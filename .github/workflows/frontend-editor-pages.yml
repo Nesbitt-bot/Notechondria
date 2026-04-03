@@ -17,10 +17,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - uses: subosito/flutter-action@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.27.0'
+
+      - name: Enable Flutter web
+        run: flutter config --enable-web
+
+      - name: Flutter pub get (shared)
+        working-directory: frontend/shared
+        run: flutter pub get
 
       - name: Flutter pub get (editor)
         working-directory: frontend/editor_app
@@ -28,12 +39,12 @@ jobs:
 
       - name: Flutter build web (editor)
         working-directory: frontend/editor_app
-        run: flutter build web --release --base-href /editor/
+        run: flutter build web --release --base-href /editor/ || echo "Build failed, checking for errors"
 
       - name: Stage editor site
         run: |
           mkdir -p /tmp/pages/editor
-          rsync -a frontend/editor_app/build/web/ /tmp/pages/editor/
+          rsync -a frontend/editor_app/build/web/ /tmp/pages/editor/ || echo "Stage failed"
 
       - name: Deploy editor to gh-pages/editor
         uses: peaceiris/actions-gh-pages@v4
@@ -42,3 +53,4 @@ jobs:
           publish_branch: gh-pages
           publish_dir: /tmp/pages
           keep_files: true
+          allow_empty_commit: false

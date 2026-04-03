@@ -1,4 +1,4 @@
-part of notechondria_shared;
+part of notechondria_frontend;
 
 /// Root application widget that configures theme state and launches the shell.
 class NotechondriaApp extends StatefulWidget {
@@ -34,7 +34,7 @@ class _NotechondriaAppState extends State<NotechondriaApp> {
   Widget build(BuildContext context) {
     final seedColor = _themeSeed(_themePreset);
     return MaterialApp(
-      title: widget.title,
+      title: 'Notechondria',
       debugShowCheckedModeBanner: false,
       themeMode: _themeMode,
       theme: ThemeData(
@@ -85,7 +85,7 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  late int _selectedIndex;
+  int _selectedIndex = 0;
   bool _isLoading = true;
   String? _errorMessage;
   String? _token;
@@ -169,7 +169,7 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
-    final clamped = widget.initialIndex.clamp(0, _titles.length - 1) as int;
+    final clamped = widget.initialIndex.clamp(0, _titles.length - 1);
     _selectedIndex = _visibleIndices.contains(clamped) ? clamped : _visibleIndices.first;
     _bootstrapApp();
   }
@@ -2381,7 +2381,7 @@ class _AppShellState extends State<AppShell> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.appTitle,
+                          'Notechondria',
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
@@ -2541,9 +2541,7 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _handleDestinationSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    _selectActualIndex(index);
   }
 
   Widget _buildPage() {
