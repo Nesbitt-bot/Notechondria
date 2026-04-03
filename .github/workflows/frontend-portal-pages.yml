@@ -1,0 +1,44 @@
+name: frontend-portal-pages
+
+on:
+  push:
+    branches: [ main, codex ]
+    paths:
+      - 'frontend/portal_app/**'
+      - 'frontend/shared/**'
+      - '.github/workflows/frontend-portal-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get (portal)
+        working-directory: frontend/portal_app
+        run: flutter pub get
+
+      - name: Flutter build web (portal)
+        working-directory: frontend/portal_app
+        run: flutter build web --release --base-href /portal/
+
+      - name: Stage portal site
+        run: |
+          mkdir -p /tmp/pages/portal
+          rsync -a frontend/portal_app/build/web/ /tmp/pages/portal/
+
+      - name: Deploy portal to gh-pages/portal
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: /tmp/pages
+          keep_files: true

@@ -1,0 +1,44 @@
+name: frontend-planner-pages
+
+on:
+  push:
+    branches: [ main, codex ]
+    paths:
+      - 'frontend/planner_app/**'
+      - 'frontend/shared/**'
+      - '.github/workflows/frontend-planner-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get (planner)
+        working-directory: frontend/planner_app
+        run: flutter pub get
+
+      - name: Flutter build web (planner)
+        working-directory: frontend/planner_app
+        run: flutter build web --release --base-href /planner/
+
+      - name: Stage planner site
+        run: |
+          mkdir -p /tmp/pages/planner
+          rsync -a frontend/planner_app/build/web/ /tmp/pages/planner/
+
+      - name: Deploy planner to gh-pages/planner
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: /tmp/pages
+          keep_files: true

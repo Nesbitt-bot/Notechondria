@@ -1,0 +1,44 @@
+name: frontend-editor-pages
+
+on:
+  push:
+    branches: [ main, codex ]
+    paths:
+      - 'frontend/editor_app/**'
+      - 'frontend/shared/**'
+      - '.github/workflows/frontend-editor-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get (editor)
+        working-directory: frontend/editor_app
+        run: flutter pub get
+
+      - name: Flutter build web (editor)
+        working-directory: frontend/editor_app
+        run: flutter build web --release --base-href /editor/
+
+      - name: Stage editor site
+        run: |
+          mkdir -p /tmp/pages/editor
+          rsync -a frontend/editor_app/build/web/ /tmp/pages/editor/
+
+      - name: Deploy editor to gh-pages/editor
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: /tmp/pages
+          keep_files: true

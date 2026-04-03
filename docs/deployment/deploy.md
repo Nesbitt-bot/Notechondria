@@ -127,14 +127,13 @@ The pipeline now runs in this order:
 1. Checkout source.
 2. Generate `${WORKSPACE}/.env.deploy` from Jenkins-injected environment variables.
 3. Start the `db` service and back up PostgreSQL from the database container.
-4. Run the backend track: backend tests, then backend deploy.
-5. Run the frontend track independently: frontend tests, then frontend deploy.
+4. Run backend tests.
+5. Deploy backend.
 
-Track behavior:
+Pipeline behavior:
 
-- The backend track is required for a green pipeline.
-- The frontend track is isolated and wrapped with `catchError`.
-- If the frontend track fails, Jenkins marks the build unstable, but the backend track can still deploy the latest backend changes for testing.
+- Jenkins is backend-only.
+- Frontend CI/CD is handled separately through GitHub Actions workflows for the split frontend apps.
 - The backend deploy script now performs a post-start verification pass inside the running app container:
   - `python manage.py migrate --noinput`
   - `python manage.py bootstrap_platform`
@@ -148,11 +147,13 @@ The relevant files are:
 - `deployment/scripts/backup_postgres.sh`
 - `deployment/scripts/ensure_db_ready.sh`
 - `deployment/scripts/test_backend.sh`
-- `deployment/scripts/test_frontend.sh`
 - `deployment/scripts/wait_for_stack.sh`
-- `deployment/scripts/wait_for_frontend.sh`
 - `deployment/scripts/deploy_backend.sh`
-- `deployment/scripts/deploy_frontend.sh`
+
+Frontend app CI/CD is defined in:
+- `.github/workflows/frontend-editor-pages.yml`
+- `.github/workflows/frontend-planner-pages.yml`
+- `.github/workflows/frontend-portal-pages.yml`
 
 ### Compose stack shape
 
@@ -232,16 +233,17 @@ This repository now keeps only the Monaco `min/` runtime bundle under `backend/s
 
 ## Frontend split status
 
-The repository now contains `frontend/shared`, `frontend/editor_app`, `frontend/planner_app`, and `frontend/portal_app` as the target split layout. The Docker and Jenkins deployment path documented below is still the **legacy compatibility build** rooted at `frontend/`. Do not read this document as proof that the three new app packages already have independent deploy automation.
+The repository now contains `frontend/shared`, `frontend/editor_app`, `frontend/planner_app`, and `frontend/portal_app` as the target split layout.
 
-## 6) Frontend web build (standalone container)
+Current direction:
+- Jenkins no longer deploys frontend.
+- Each frontend app has its own GitHub Actions workflow.
+- Current Pages target is a shared `gh-pages` branch with independent subpaths:
+  - `/editor/`
+  - `/planner/`
+  - `/portal/`
 
-```bash
-cd frontend
-docker compose --env-file ../.env up --build -d
-```
-
-The frontend container builds Flutter web with `FRONTEND_API_BASE_URL`, serves the resulting static site through nginx on `FRONTEND_HOST_PORT`, and proxies `/api`, `/admin`, `/static`, and `/media` to `FRONTEND_BACKEND_ORIGIN` over the shared Docker network. `FRONTEND_API_BASE_URL` must stay an absolute browser-reachable URL such as `http://localhost:9060/api/v1`; do not use a slash-prefixed relative value in Windows-hosted Git Bash environments because it can be path-converted into a broken `C:/...` build argument. The frontend deploy scripts now unset conflicting shell variables, disable MSYS path conversion for Docker commands, and fail fast if `FRONTEND_API_BASE_URL` is not absolute. The default backend origin is `http://nginx`, not a host-local address like `localhost` or `host.docker.internal`.
+This is the current CI/CD target state, not a claim that the three apps have been fully runtime-verified on this machine.
 
 ## 7) Test deployment template
 
