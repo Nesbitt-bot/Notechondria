@@ -230,6 +230,10 @@ If needed, also move the Jenkins workspace root to a shorter directory such as `
 
 This repository now keeps only the Monaco `min/` runtime bundle under `backend/static/monaco-editor/` to reduce checkout path depth.
 
+## Frontend split status
+
+The repository now contains `frontend/shared`, `frontend/editor_app`, `frontend/planner_app`, and `frontend/portal_app` as the target split layout. The Docker and Jenkins deployment path documented below is still the **legacy compatibility build** rooted at `frontend/`. Do not read this document as proof that the three new app packages already have independent deploy automation.
+
 ## 6) Frontend web build (standalone container)
 
 ```bash

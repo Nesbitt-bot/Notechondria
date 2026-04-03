@@ -17,7 +17,7 @@ Use this checklist at the end of each modification round.
 - Confirm every command or test reported as passed was actually run in the current environment.
 - Confirm every command or test not run is called out explicitly with the reason.
 - Confirm docs reference current paths such as `backend/`, `frontend/`, `docs/`, and `deployment/`.
-- Confirm `CODEX.md` was updated when the round materially changed architecture, product scope, or the prompt recipe needed to recreate the project.
+- Confirm `AGENTS.md` was updated when the round materially changed architecture, product scope, or the prompt recipe needed to recreate the project.
 - Confirm CI files and scripts agree on invocation syntax and environment variable names.
 - Confirm UI strings are plain, intentional, and free of mojibake or placeholder artifacts.
 - Confirm `.gitignore` ignores local junk without hiding required tracked source files.
@@ -30,7 +30,7 @@ Use this checklist at the end of each modification round.
 - Fixed a visible separator encoding issue in the Flutter front page subtitle.
 - Made the selected course stateful across course, learner, and activity views.
 - Expanded Flutter widget coverage for course selection flow.
-- Added `CODEX.md` and updated repo links.
+- Added `AGENTS.md` and updated repo links.
 - Backend verification was blocked because the available `python.exe` resolves to the Windows Store shim rather than a runnable interpreter.
 - Flutter verification was attempted through the installed `flutter.bat`, but the command did not complete within the allotted timeout in this environment.
 - Switched Jenkins backup and test execution to Docker-native scripts so the host no longer needs `pg_dump` or `python`.
@@ -56,7 +56,7 @@ Use this checklist at the end of each modification round.
 - Added a reminder that CI image rebuilds should use `--pull --no-cache` when the goal is to eliminate stale dependency and base-image state during Jenkins debugging.
 - Added a reminder that Docker service networking must never be tied to `DEBUG`; database host resolution should come from env (`POSTGRE_HOST=db` in Compose), not a `localhost` fallback triggered by debug mode.
 - Added a reminder that database preflight checks must verify the same TCP username/password path the app uses, not just local-socket readiness from inside the postgres container.
-- Added a reminder that material project-shape changes must be recorded in `CODEX.md`, including how to prompt an AI run to recreate the new shape.
+- Added a reminder that material project-shape changes must be recorded in `AGENTS.md`, including how to prompt an AI run to recreate the new shape.
 - Reworked the Flutter learner flow so recent notes stay primary, note reading happens in dialogs, and the markdown preview is explicitly scrollable to avoid overflow regressions.
 - Added inline LaTeX markdown rendering, week-calendar activity views, note-session calendar events, theme/API-base settings, and frontend/API debug surfaces.
 - Split the oversized Flutter `main.dart` into a thin entrypoint, shared `core/` and `components/` libraries, plus dedicated `front`, `learner`, `course`, `activity`, and `settings` module files.

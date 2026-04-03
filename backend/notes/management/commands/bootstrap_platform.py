@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
     def bootstrap_sample_content(self):
         sample_root = self.resolve_sample_base_root()
-        code_source = self.resolve_codex_path().read_text(encoding="utf-8")
+        code_source = self.resolve_agents_path().read_text(encoding="utf-8")
         owner = User.objects.filter(is_superuser=True).order_by("id").first()
         if owner is None:
             owner, _ = User.objects.get_or_create(
@@ -208,11 +208,11 @@ class Command(BaseCommand):
         return json.loads(course_path.read_text(encoding="utf-8"))
 
     @staticmethod
-    def resolve_codex_path():
+    def resolve_agents_path():
         candidates = [
-            settings.BASE_DIR.parent / "CODEX.md",
-            settings.BASE_DIR / "CODEX.md",
-            settings.BASE_DIR.parent.parent / "CODEX.md",
+            settings.BASE_DIR.parent / "AGENTS.md",
+            settings.BASE_DIR / "AGENTS.md",
+            settings.BASE_DIR.parent.parent / "AGENTS.md",
             settings.BASE_DIR.parent / "codex.md",
             settings.BASE_DIR / "codex.md",
             settings.BASE_DIR.parent.parent / "codex.md",
@@ -220,7 +220,7 @@ class Command(BaseCommand):
         for candidate in candidates:
             if candidate.exists():
                 return candidate
-        raise FileNotFoundError("Could not find CODEX.md in expected runtime locations.")
+        raise FileNotFoundError("Could not find AGENTS.md in expected runtime locations.")
 
     def attach_course_cover(self, course: Course, cover_path):
         resolved_cover_path = self.resolve_course_asset_path(course.slug, cover_path)

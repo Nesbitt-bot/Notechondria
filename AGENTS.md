@@ -1,4 +1,4 @@
-# CODEX Handoff
+# AGENTS Handoff
 
 This file is the current engineer handoff for the Notechondria workspace. It is meant to transfer architecture decisions, deployment assumptions, product scope, and verification reality to the next engineer without relying on thread history.
 
@@ -13,12 +13,12 @@ This file is the current engineer handoff for the Notechondria workspace. It is 
 ## 2. Repository map
 
 - `backend/`: Django project, DRF APIs, admin, nginx/static/media wiring, Docker assets, backend tests.
-- `frontend/`: Flutter app, web container build, frontend tests, frontend nginx config.
+- `frontend/`: incremental Flutter split workspace with a legacy compatibility app at the root plus `shared/`, `editor_app/`, `planner_app/`, and `portal_app/`.
 - `deployment/`: CI/CD shell scripts for env generation, testing, deployment, and wait logic.
 - `docs/`: deployment and project docs.
 - `sample/`: seeded example course content and media used to bootstrap an empty database.
 - `course_template/`: older course template artifacts; keep only if still useful for migration or examples.
-- `CODEX.md`: this handoff file.
+- `AGENTS.md`: this handoff file.
 - `LLM_CHECK.md`: end-of-round safety checklist and accumulated pitfalls.
 
 ## 3. Backend design
@@ -67,7 +67,7 @@ This file is the current engineer handoff for the Notechondria workspace. It is 
   - `Meaning of Work in Age of AI`
   - `Self-identity and Expression in Modern Arts`
 - Bootstrap also creates a demo creator account named `CodeX` and logs the generated credentials during bootstrap.
-- Source material comes from `sample/` plus repository content such as `CODEX.md`.
+- Source material comes from `sample/` plus repository content such as `AGENTS.md`.
 - Bootstrap logic lives under `backend/notes/management/commands/bootstrap_platform.py`.
 - Sample course metadata now lives in per-course directories under `sample/<slug>/course.json` with matching media assets in `sample/<slug>/media/`.
 - Bootstrap was hardened so missing optional sample assets should not crash the app.
@@ -92,16 +92,32 @@ This file is the current engineer handoff for the Notechondria workspace. It is 
 
 ### 4.1 Code organization
 
-- Thin entrypoint: `frontend/lib/main.dart`
-- Shared shell/state: `frontend/lib/app_shell.dart`
-- Shared helpers: `frontend/lib/core/`
-- Reusable widgets: `frontend/lib/components/`
-- Page modules:
-  - `frontend/lib/modules/front.dart`
-  - `frontend/lib/modules/learner.dart`
-  - `frontend/lib/modules/course.dart`
-  - `frontend/lib/modules/activity.dart`
-  - `frontend/lib/modules/settings.dart`
+Current extracted split:
+
+- Legacy compatibility app remains at the root frontend package:
+  - `frontend/lib/main.dart`
+  - `frontend/lib/app_shell.dart`
+  - `frontend/lib/core/`
+  - `frontend/lib/components/`
+  - `frontend/lib/modules/`
+- Shared extracted package:
+  - `frontend/shared/lib/main.dart`
+  - `frontend/shared/lib/app_shell.dart`
+  - `frontend/shared/lib/core/`
+  - `frontend/shared/lib/components/`
+  - `frontend/shared/lib/modules/`
+- Thin app wrappers:
+  - `frontend/editor_app/`
+  - `frontend/planner_app/`
+  - `frontend/portal_app/`
+
+Mapping in this pass:
+
+- learner -> editor_app
+- front + course + activity -> planner_app
+- settings/auth/orchestration -> portal_app
+
+The new app wrappers currently start the extracted shared shell on different default tabs. They are scaffolding for the split, not a claim of fully isolated runtimes yet.
 
 ### 4.2 Layout model
 
@@ -324,7 +340,7 @@ Continue from the current state rather than rebuilding from zero:
 - Keep auth centered in Settings using compact dialog flows.
 - Keep backend/frontend deployment separate, with Dockerized backend and standalone Dockerized Flutter web frontend.
 - Preserve env-driven ports, SMTP fallback-to-log behavior, admin bootstrap, seeded sample course content, and the Jenkins split release tracks where backend can deploy even if the frontend track fails.
-- When changing the project shape, update CODEX.md and LLM_CHECK.md.
+- When changing the project shape, update AGENTS.md and LLM_CHECK.md.
 - State clearly what you actually verified versus what you could not verify.
 ```
 
@@ -335,4 +351,4 @@ Every substantial round should end with:
 1. Targeted source or doc edits that match the current repo structure.
 2. A clear statement of what was actually run and what was blocked.
 3. An `LLM_CHECK.md` pass against the new changes.
-4. A `CODEX.md` update whenever architecture, deployment shape, or the safest continuation prompt changes materially.
+4. An `AGENTS.md` update whenever architecture, deployment shape, or the safest continuation prompt changes materially.

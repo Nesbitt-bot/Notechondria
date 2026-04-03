@@ -1,42 +1,23 @@
-# Frontend (Flutter)
+# Frontend split workspace
 
-This Flutter app is the client for the Canvas-like calendar experience.
+The repository now has an incremental split plan under `frontend/`:
 
-## Structure
+- `shared/` — extracted shared Flutter shell, modules, helpers, and components
+- `editor_app/` — thin app wrapper aimed at the legacy learner editor flow
+- `planner_app/` — thin app wrapper for course/activity/front orchestration
+- `portal_app/` — thin auth/settings/orchestration portal
+- root `lib/`, `pubspec.yaml`, `Dockerfile`, and `docker-compose.yml` — legacy compatibility app kept in place during extraction
 
-- `lib/main.dart`: thin library entrypoint.
-- `lib/app_shell.dart`: top-level app shell and shared app state.
-- `lib/core/`: shared client and helper logic.
-- `lib/components/`: reusable UI components.
-- `lib/modules/`: independent page modules for `front`, `learner`, `course`, `activity`, and `settings`.
+## Mapping from old modules
 
-## Pages in MVP scaffold
+Legacy module | Target app in this split
+--- | ---
+`modules/learner.dart` | `editor_app`
+`modules/course.dart` | `planner_app` first, with portal hooks for auth/subscription surfaces
+`modules/activity.dart` | `planner_app`
+`modules/front.dart` | `planner_app` for planning discovery, with selected auth/orchestration surfaces later reachable from `portal_app`
+`modules/settings.dart` | `portal_app`
 
-- Front Page
-- Learner View
-- Course View
-- Activity View
-- Settings View
+## Current verification status
 
-Each page is reachable from the bottom navigation bar in `lib/main.dart`.
-
-## Run locally
-
-```bash
-flutter pub get
-flutter run -d chrome
-```
-
-## Docker web build
-
-```bash
-docker compose --env-file ../sample.env -f docker-compose.yml up --build -d
-```
-
-The standalone web container serves the Flutter build on `FRONTEND_HOST_PORT`. The image compiles with `FRONTEND_API_BASE_URL` and the nginx runtime proxies `/api`, `/admin`, `/static`, and `/media` to `FRONTEND_BACKEND_ORIGIN` over the shared Docker network. Keep `FRONTEND_API_BASE_URL` absolute, for example `http://localhost:9060/api/v1`, so Windows-hosted Git Bash does not path-convert a slash-prefixed value during Docker build. The default backend origin is `http://nginx`.
-
-## Test
-
-```bash
-flutter test
-```
+This pass extracts shared code and creates app package boundaries. It does **not** claim that each new app is fully isolated or production-ready yet. The legacy root frontend remains the compatibility runtime until the split is verified further.

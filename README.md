@@ -24,7 +24,7 @@ We will not use your knowledge to feed the AI, we use open API and ensure that y
 ## Repository layout
 
 * `backend/` - Django backend services and infrastructure.
-* `frontend/` - Flutter client application and standalone web container build.
+* `frontend/` - incremental Flutter split workspace with the legacy compatibility app at the root plus `shared/`, `editor_app/`, `planner_app/`, and `portal_app`.
 * `docs/` - Product documentation, MVP scope, and planning references.
 * `course_template/` - Canonical git course template for import/export and validation.
 
@@ -38,7 +38,7 @@ We will not use your knowledge to feed the AI, we use open API and ensure that y
 * Environment template: `sample.env`
 * Test deployment env example: `sample.test.env`
 * Jenkins environment injection guide: `docs/deployment/deploy.md`
-* Build-from-scratch prompt report: `CODEX.md`
+* Build-from-scratch prompt report: `AGENTS.md`
 * LLM delivery checklist: `LLM_CHECK.md`
 
 ## Jenkins Deployment
@@ -50,6 +50,8 @@ This repository is set up for a Jenkins Pipeline job that:
 * renders `.env.deploy` in the workspace,
 * runs backup/test/deploy through Docker only,
 * runs backend and frontend test/deploy stages in parallel after environment preparation,
+* keeps the current root `frontend/` Docker build as the legacy compatibility deploy path,
+* documents the three-package frontend split target (`editor_app`, `planner_app`, `portal_app`) without claiming it is fully wired into CI yet,
 * builds fresh `app` and `nginx` images for each Jenkins build using the current `BUILD_NUMBER`,
 * builds a fresh standalone Flutter web image for each Jenkins build,
 * forces no-cache Docker rebuilds and fresh container recreation on each deployment run.
